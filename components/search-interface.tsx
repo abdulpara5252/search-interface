@@ -21,93 +21,10 @@ import { Switch } from "@/components/ui/switch"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { motion, AnimatePresence } from "framer-motion"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import data from "../Data.json"
 
-// Mock data for search results
-const mockResults: { people: PersonResult[]; files: FileResult[] } = {
-  people: [
-    {
-      id: 1,
-      name: "Randall Johnsson",
-      status: "Active now",
-      avatar: "/professional-man.png",
-      isActive: true,
-    },
-    {
-      id: 2,
-      name: "Kristinge Karand",
-      status: "Active 2d ago",
-      avatar: "/professional-woman.png",
-      isActive: false,
-    },
-    {
-      id: 3,
-      name: "Caroline Dribsson",
-      status: "Unactivated",
-      avatar: "/man-with-beard.png",
-      isActive: false,
-    },
-    {
-      id: 4,
-      name: "Adam Cadribean",
-      status: "Active 1w ago",
-      avatar: "/young-man-contemplative.png",
-      isActive: false,
-    },
-    {
-      id: 5,
-      name: "Margareth Cendribgssen",
-      status: "Active 1w ago",
-      avatar: "/elderly-woman-knitting.png",
-      isActive: false,
-    },
-  ],
-  files: [
-    {
-      id: 1,
-      name: "Random Michal Folder",
-      type: "folder",
-      location: "Photos",
-      fileCount: 12,
-      lastModified: "Edited 12m ago",
-    },
-    {
-      id: 2,
-      name: "creative_file_frandkies.jpg",
-      type: "image",
-      location: "Photos/Assets",
-      lastModified: "Edited 12m ago",
-    },
-    {
-      id: 3,
-      name: "files_krande_michelle.avi",
-      type: "video",
-      location: "Videos",
-      lastModified: "Added 12m ago",
-    },
-    {
-      id: 4,
-      name: "final_dribbble_presentation.jpg",
-      type: "image",
-      location: "Presentations",
-      lastModified: "Edited 1w ago",
-    },
-    {
-      id: 5,
-      name: "dribbble_animation.avi",
-      type: "video",
-      location: "Videos",
-      lastModified: "Added 1y ago",
-    },
-    {
-      id: 6,
-      name: "Dribbble Folder",
-      type: "folder",
-      location: "Projects",
-      fileCount: 12,
-      lastModified: "Edited 2m ago",
-    },
-  ],
-}
+// Import mock data from JSON file
+const mockResults = data
 
 type PersonResult = {
   id: number
@@ -124,6 +41,26 @@ type FileResult = {
   location: string
   lastModified: string
   fileCount?: number
+}
+
+type ChatResult = {
+  id: number
+  name: string
+  participants: string[]
+  lastMessage: string
+  lastMessageTime: string
+  unreadCount: number
+  type: string
+}
+
+type ListResult = {
+  id: number
+  name: string
+  description: string
+  itemCount: number
+  lastModified: string
+  type: string
+  owner: string
 }
 
 const highlightText = (text: string, query: string) => {
@@ -147,6 +84,7 @@ export default function SearchInterface() {
   const [isLoading, setIsLoading] = useState(false)
   const [hoveredItem, setHoveredItem] = useState<string | null>(null)
   const [copiedItem, setCopiedItem] = useState<string | null>(null)
+  const [tooltipOpen, setTooltipOpen] = useState<string | null>(null)
   const [filters, setFilters] = useState({
     files: true,
     people: true,
@@ -172,15 +110,25 @@ export default function SearchInterface() {
 
   const filteredFiles = mockResults.files.filter((file) => file.name.toLowerCase().includes(searchQuery.toLowerCase()))
 
-  const allResults = [...filteredPeople, ...filteredFiles]
+  const filteredChats = mockResults.chats.filter((chat) => 
+    chat.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    chat.lastMessage.toLowerCase().includes(searchQuery.toLowerCase())
+  )
+
+  const filteredLists = mockResults.lists.filter((list) =>
+    list.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    list.description.toLowerCase().includes(searchQuery.toLowerCase())
+  )
+
+  const allResults = [...filteredPeople, ...filteredFiles, ...filteredChats, ...filteredLists]
 
   const getResultCounts = () => {
     return {
       all: allResults.length,
       files: filteredFiles.length,
       people: filteredPeople.length,
-      chats: 0, // Mock data for chats
-      lists: 0, // Mock data for lists
+      chats: filteredChats.length,
+      lists: filteredLists.length,
     }
   }
 
@@ -213,13 +161,13 @@ export default function SearchInterface() {
   const getFileIcon = (type: string) => {
     switch (type) {
       case "folder":
-        return <Folder className="w-5 h-5 text-gray-500" />
+        return <Folder className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500" />
       case "image":
-        return <ImageIcon className="w-5 h-5 text-gray-500" />
+        return <ImageIcon className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500" />
       case "video":
-        return <Play className="w-5 h-5 text-gray-500" />
+        return <Play className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500" />
       default:
-        return <Paperclip className="w-5 h-5 text-gray-500" />
+        return <Paperclip className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500" />
     }
   }
 
@@ -228,12 +176,21 @@ export default function SearchInterface() {
     setShowFilters(false)
     setHoveredItem(null)
     setCopiedItem(null)
+    setTooltipOpen(null)
   }
 
   const handleCopyLink = (item: any) => {
     navigator.clipboard.writeText(`https://example.com/item/${item.id}`)
     setCopiedItem(item.id.toString())
-    setTimeout(() => setCopiedItem(null), 2000)
+    setTooltipOpen(item.id.toString())
+    
+    setTimeout(() => {
+      setTooltipOpen(null)
+      // Small delay to ensure tooltip closes before resetting copiedItem
+      setTimeout(() => {
+        setCopiedItem(null)
+      }, 100)
+    }, 2000)
   }
 
   const renderResults = () => {
@@ -263,7 +220,7 @@ export default function SearchInterface() {
         </motion.div>
       )
     }
-
+  
     if (isLoading) {
       return (
         <motion.div className="space-y-4 mt-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
@@ -285,17 +242,21 @@ export default function SearchInterface() {
         </motion.div>
       )
     }
-
-    let resultsToShow: (PersonResult | FileResult)[] = []
-
+  
+    let resultsToShow: (PersonResult | FileResult | ChatResult | ListResult)[] = []
+  
     if (activeTab === "all") {
-      resultsToShow = [...filteredPeople, ...filteredFiles]
+      resultsToShow = [...filteredPeople, ...filteredFiles, ...filteredChats, ...filteredLists] as (PersonResult | FileResult | ChatResult | ListResult)[]
     } else if (activeTab === "people") {
       resultsToShow = filteredPeople
     } else if (activeTab === "files") {
       resultsToShow = filteredFiles
+    } else if (activeTab === "chats") {
+      resultsToShow = filteredChats as ChatResult[]
+    } else if (activeTab === "lists") {
+      resultsToShow = filteredLists as ListResult[]
     }
-
+  
     return (
       <motion.div
         className="space-y-4 mt-6"
@@ -304,166 +265,287 @@ export default function SearchInterface() {
         transition={{ duration: 0.3 }}
       >
         <AnimatePresence>
-          {resultsToShow.map((result, index) => (
-            <motion.div
-              key={`${result.id}-${"status" in result ? "person" : "file"}`}
-              className="relative flex items-center space-x-3 hover:bg-gray-50 p-2 rounded-lg cursor-pointer group"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ delay: index * 0.05, duration: 0.3 }}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onMouseEnter={() => setHoveredItem(`${result.id}-${"status" in result ? "person" : "file"}`)}
-              onMouseLeave={() => setHoveredItem(null)}
-            >
-              {"status" in result ? (
-                // Person result
-                <>
-                  <div className="relative">
-                    <Avatar className="w-10 h-10">
-                      <AvatarImage src={result.avatar || "/placeholder.svg"} alt={result.name} />
-                      <AvatarFallback>
-                        {result.name
-                          .split(" ")
-                          .map((n: string) => n[0])
-                          .join("")}
-                      </AvatarFallback>
-                    </Avatar>
-                    {result.isActive && (
-                      <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full" />
-                    )}
-                    {result.status === "Unactivated" && (
-                      <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-red-500 border-2 border-white rounded-full" />
-                    )}
-                    {result.status.includes("ago") && !result.isActive && (
-                      <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-yellow-500 border-2 border-white rounded-full" />
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <div className="font-medium text-gray-900">{highlightText(result.name, searchQuery)}</div>
-                    <div className="text-sm text-gray-500">{result.status}</div>
-                  </div>
-
-                  <AnimatePresence>
-                    {hoveredItem === `${result.id}-person` && (
-                      <motion.div
-                        className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center space-x-2"
-                        initial={{ opacity: 0, x: 10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: 10 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        {copiedItem === result.id.toString() ? (
-                          <motion.div
-                            className="bg-black text-white px-3 py-1 rounded text-xs flex items-center space-x-1"
-                            initial={{ scale: 0.8 }}
-                            animate={{ scale: 1 }}
-                            transition={{ duration: 0.2 }}
-                          >
-                            <span>✓</span>
-                            <span>Link copied!</span>
-                          </motion.div>
-                        ) : (
-                          <>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8 rounded-full border border-gray-200 bg-white hover:bg-gray-100"
-                                  onClick={() => handleCopyLink(result)}
-                                >
-                                  <LinkIcon className="w-4 h-4 text-gray-700" />
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent sideOffset={6} className="bg-black text-white">Copy link</TooltipContent>
-                            </Tooltip>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-7 px-2 text-xs text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded flex items-center space-x-1"
-                              onClick={() => window.open(`/item/${result.id}`, "_blank")}
-                            >
-                              <ExternalLink className="w-3 h-3" />
-                              <span>New Tab</span>
-                            </Button>
-                          </>
-                        )}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </>
-              ) : (
-                // File result
-                <>
-                  <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
-                    {getFileIcon(result.type)}
-                  </div>
-                  <div className="flex-1">
-                    <div className="font-medium text-gray-900">
-                      {highlightText(result.name, searchQuery)}
-                      {result.type === "folder" && result.fileCount && (
-                        <span className="ml-2 text-sm text-gray-500">{result.fileCount} Files</span>
+          {resultsToShow.map((result, index) => {
+            const itemKey = `${result.id}-${"status" in result ? "person" : "lastMessage" in result ? "chat" : "itemCount" in result ? "list" : "file"}`
+            return (
+              <motion.div
+                key={itemKey}
+                className="relative flex items-center space-x-2 sm:space-x-3 hover:bg-gray-50 p-2 sm:p-3 rounded-lg cursor-pointer group"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ delay: index * 0.05, duration: 0.3 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onMouseEnter={() => setHoveredItem(itemKey)}
+                onMouseLeave={() => setHoveredItem(null)}
+              >
+                {"status" in result ? (
+                  // Person result
+                  <>
+                    <div className="relative">
+                      <Avatar className="w-8 h-8 sm:w-10 sm:h-10">
+                        <AvatarImage src={result.avatar || "/placeholder.svg"} alt={result.name} />
+                        <AvatarFallback>
+                          {result.name
+                            .split(" ")
+                            .map((n: string) => n[0])
+                            .join("")}
+                        </AvatarFallback>
+                      </Avatar>
+                      {result.isActive && (
+                        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full" />
+                      )}
+                      {result.status === "Unactivated" && (
+                        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-red-500 border-2 border-white rounded-full" />
+                      )}
+                      {result.status.includes("ago") && !result.isActive && (
+                        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-yellow-500 border-2 border-white rounded-full" />
                       )}
                     </div>
-                    <div className="text-sm text-gray-500">
-                      in {result.location} • {result.lastModified}
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-gray-900 text-sm sm:text-base truncate">{highlightText(result.name, searchQuery)}</div>
+                      <div className="text-xs sm:text-sm text-gray-500 truncate">{result.status}</div>
                     </div>
-                  </div>
-
-                  <AnimatePresence>
-                    {hoveredItem === `${result.id}-file` && (
-                      <motion.div
-                        className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center space-x-2"
-                        initial={{ opacity: 0, x: 10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: 10 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        {copiedItem === result.id.toString() ? (
-                          <motion.div
-                            className="bg-black text-white px-3 py-1 rounded text-xs flex items-center space-x-1"
-                            initial={{ scale: 0.8 }}
-                            animate={{ scale: 1 }}
-                            transition={{ duration: 0.2 }}
+  
+                    <AnimatePresence>
+                      {hoveredItem === itemKey && (
+                        <motion.div
+                          className="absolute right-1 sm:right-2 top-1/2 transform -translate-y-1/2 flex items-center space-x-1 sm:space-x-2 z-10"
+                          initial={{ opacity: 0, x: 10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: 10 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <Tooltip 
+                            open={tooltipOpen === result.id.toString() ? true : undefined}
+                            onOpenChange={(open) => {
+                              if (!open && copiedItem !== result.id.toString()) {
+                                setTooltipOpen(null)
+                              }
+                            }}
                           >
-                            <span>✓</span>
-                            <span>Link copied!</span>
-                          </motion.div>
-                        ) : (
-                          <>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                            <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8 rounded-full border border-gray-200 bg-white hover:bg-gray-100"
-                              onClick={() => handleCopyLink(result)}
+                            <TooltipTrigger asChild>
+                              <div
+                                className="h-6 w-6 sm:h-8 sm:w-8 rounded-full border border-gray-200 bg-white hover:bg-gray-100 flex items-center justify-center cursor-pointer transition-colors"
+                                onClick={() => handleCopyLink(result)}
+                              >
+                                <LinkIcon className="w-3 h-3 sm:w-4 sm:h-4 text-gray-700" />
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent
+                              side="top"
+                              sideOffset={6}
                             >
-                                  <LinkIcon className="w-4 h-4 text-gray-700" />
-                            </Button>
-                              </TooltipTrigger>
-                              <TooltipContent sideOffset={6} className="bg-black text-white">Copy link</TooltipContent>
-                            </Tooltip>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-7 px-2 text-xs text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded flex items-center space-x-1"
-                              onClick={() => window.open(`/item/${result.id}`, "_blank")}
-                            >
-                              <ExternalLink className="w-3 h-3" />
-                              <span>New Tab</span>
-                            </Button>
-                          </>
+                              {copiedItem === result.id.toString() ? "✓ Link copied!" : "Copy link"}
+                            </TooltipContent>
+                          </Tooltip>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 sm:h-7 px-1 sm:px-2 text-xs text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded flex items-center space-x-1"
+                            onClick={() => window.open(`/item/${result.id}`, "_blank")}
+                          >
+                            <ExternalLink className="w-3 h-3" />
+                            <span className="hidden sm:inline">New Tab</span>
+                          </Button>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </>
+                ) : "lastMessage" in result ? (
+                  // Chat result
+                  <>
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                      <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-gray-900 text-sm sm:text-base truncate">
+                        {highlightText(result.name, searchQuery)}
+                        {"unreadCount" in result && result.unreadCount > 0 && (
+                          <span className="ml-1 sm:ml-2 inline-flex items-center px-1.5 sm:px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            {result.unreadCount}
+                          </span>
                         )}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </>
-              )}
-            </motion.div>
-          ))}
+                      </div>
+                      <div className="text-xs sm:text-sm text-gray-500 truncate">
+                        {"lastMessage" in result && result.lastMessage} • {"lastMessageTime" in result && result.lastMessageTime}
+                      </div>
+                    </div>
+
+                    <AnimatePresence>
+                      {hoveredItem === itemKey && (
+                        <motion.div
+                          className="absolute right-1 sm:right-2 top-1/2 transform -translate-y-1/2 flex items-center space-x-1 sm:space-x-2 z-10"
+                          initial={{ opacity: 0, x: 10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: 10 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <Tooltip 
+                            open={tooltipOpen === result.id.toString() ? true : undefined}
+                            onOpenChange={(open) => {
+                              if (!open && copiedItem !== result.id.toString()) {
+                                setTooltipOpen(null)
+                              }
+                            }}
+                          >
+                            <TooltipTrigger asChild>
+                              <div
+                                className="h-6 w-6 sm:h-8 sm:w-8 rounded-full border border-gray-200 bg-white hover:bg-gray-100 flex items-center justify-center cursor-pointer transition-colors"
+                                onClick={() => handleCopyLink(result)}
+                              >
+                                <LinkIcon className="w-3 h-3 sm:w-4 sm:h-4 text-gray-700" />
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent
+                              side="top"
+                              sideOffset={6}
+                            >
+                              {copiedItem === result.id.toString() ? "Link copied!" : "Copy link"}
+                            </TooltipContent>
+                          </Tooltip>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 sm:h-7 px-1 sm:px-2 text-xs text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded flex items-center space-x-1"
+                            onClick={() => window.open(`/chat/${result.id}`, "_blank")}
+                          >
+                            <ExternalLink className="w-3 h-3" />
+                            <span className="hidden sm:inline">Open Chat</span>
+                          </Button>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </>
+                ) : "type" in result && "location" in result ? (
+                  // File result
+                  <>
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                      {getFileIcon(result.type)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-gray-900 text-sm sm:text-base truncate">
+                        {highlightText(result.name, searchQuery)}
+                        {result.type === "folder" && result.fileCount && (
+                          <span className="ml-1 sm:ml-2 text-xs sm:text-sm text-gray-500">{result.fileCount} Files</span>
+                        )}
+                      </div>
+                      <div className="text-xs sm:text-sm text-gray-500 truncate">
+                        in {result.location} • {result.lastModified}
+                      </div>
+                    </div>
+  
+                    <AnimatePresence>
+                      {hoveredItem === itemKey && (
+                        <motion.div
+                          className="absolute right-1 sm:right-2 top-1/2 transform -translate-y-1/2 flex items-center space-x-1 sm:space-x-2 z-10"
+                          initial={{ opacity: 0, x: 10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: 10 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <Tooltip 
+                            open={tooltipOpen === result.id.toString() ? true : undefined}
+                            onOpenChange={(open) => {
+                              if (!open && copiedItem !== result.id.toString()) {
+                                setTooltipOpen(null)
+                              }
+                            }}
+                          >
+                            <TooltipTrigger asChild>
+                              <div
+                                className="h-6 w-6 sm:h-8 sm:w-8 rounded-full border border-gray-200 bg-white hover:bg-gray-100 flex items-center justify-center cursor-pointer transition-colors"
+                                onClick={() => handleCopyLink(result)}
+                              >
+                                <LinkIcon className="w-3 h-3 sm:w-4 sm:h-4 text-gray-700" />
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent
+                              side="top"
+                              sideOffset={6}
+                            >
+                              {copiedItem === result.id.toString() ? "Link copied!" : "Copy link"}
+                            </TooltipContent>
+                          </Tooltip>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 sm:h-7 px-1 sm:px-2 text-xs text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded flex items-center space-x-1"
+                            onClick={() => window.open(`/item/${result.id}`, "_blank")}
+                          >
+                            <ExternalLink className="w-3 h-3" />
+                            <span className="hidden sm:inline">New Tab</span>
+                          </Button>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </>
+                ) : "itemCount" in result ? (
+                  // List result
+                  <>
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                      <List className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-gray-900 text-sm sm:text-base truncate">
+                        {highlightText(result.name, searchQuery)}
+                        <span className="ml-1 sm:ml-2 text-xs sm:text-sm text-gray-500">{"itemCount" in result && result.itemCount} items</span>
+                      </div>
+                      <div className="text-xs sm:text-sm text-gray-500 truncate">
+                        {"description" in result && result.description} • {"lastModified" in result && result.lastModified}
+                      </div>
+                    </div>
+
+                    <AnimatePresence>
+                      {hoveredItem === itemKey && (
+                        <motion.div
+                          className="absolute right-1 sm:right-2 top-1/2 transform -translate-y-1/2 flex items-center space-x-1 sm:space-x-2 z-10"
+                          initial={{ opacity: 0, x: 10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: 10 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <Tooltip 
+                            open={tooltipOpen === result.id.toString() ? true : undefined}
+                            onOpenChange={(open) => {
+                              if (!open && copiedItem !== result.id.toString()) {
+                                setTooltipOpen(null)
+                              }
+                            }}
+                          >
+                            <TooltipTrigger asChild>
+                              <div
+                                className="h-6 w-6 sm:h-8 sm:w-8 rounded-full border border-gray-200 bg-white hover:bg-gray-100 flex items-center justify-center cursor-pointer transition-colors"
+                                onClick={() => handleCopyLink(result)}
+                              >
+                                <LinkIcon className="w-3 h-3 sm:w-4 sm:h-4 text-gray-700" />
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent
+                              side="top"
+                              sideOffset={6}
+                            >
+                              {copiedItem === result.id.toString() ? "Link copied!" : "Copy link"}
+                            </TooltipContent>
+                          </Tooltip>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 sm:h-7 px-1 sm:px-2 text-xs text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded flex items-center space-x-1"
+                            onClick={() => window.open(`/list/${result.id}`, "_blank")}
+                          >
+                            <ExternalLink className="w-3 h-3" />
+                            <span className="hidden sm:inline">Open List</span>
+                          </Button>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </>
+                ) : null}
+              </motion.div>
+            )
+          })}
         </AnimatePresence>
       </motion.div>
     )
@@ -485,7 +567,7 @@ export default function SearchInterface() {
     >
       {/* Search Header */}
       <motion.div
-        className="p-6"
+        className="p-4 sm:p-6"
         layout
         animate={{
           borderBottom: isCollapsed ? "none" : "1px solid rgb(243 244 246)",
@@ -513,7 +595,7 @@ export default function SearchInterface() {
               placeholder="Searching is easier"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 pr-28 py-3 text-lg border-0 bg-white focus:bg-white focus:ring-0 focus:outline-none focus:border-0 focus:shadow-none rounded-xl"
+              className="pl-10 pr-20 sm:pr-28 py-2 sm:py-3 text-base sm:text-lg border-0 bg-white focus:bg-white focus:ring-0 focus:outline-none focus:border-0 focus:shadow-none rounded-xl"
             />
             <AnimatePresence>
               {isCollapsed && !searchQuery && (
@@ -522,12 +604,12 @@ export default function SearchInterface() {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 10 }}
                   transition={{ duration: 0.2 }}
-                  className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 flex items-center space-x-2"
+                  className="pointer-events-none absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 flex items-center space-x-1 sm:space-x-2"
                 >
                   <div className="w-6 h-6 bg-white rounded border border-gray-200 flex items-center justify-center shadow-sm">
                     <span className="text-sm font-medium text-gray-700">S</span>
                   </div>
-                  <span className="text-sm text-gray-500">quick access</span>
+                  <span className="text-xs sm:text-sm text-gray-500 hidden sm:inline">quick access</span>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -562,14 +644,14 @@ export default function SearchInterface() {
           <>
             {/* Tabs and Settings */}
             <motion.div
-              className="px-6 py-4 border-b border-gray-100"
+              className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-100"
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.3 }}
             >
               <div className="flex items-center justify-between">
-                <motion.div className="flex space-x-8" layout>
+                <motion.div className="flex space-x-4 sm:space-x-8 overflow-x-auto" layout>
                   <AnimatePresence>
                     {getVisibleTabs().map((tab) => {
                       const Icon = tab.icon
@@ -577,87 +659,93 @@ export default function SearchInterface() {
                         <button
                           key={tab.key}
                           onClick={() => setActiveTab(tab.key)}
-                          className={`flex items-center space-x-2 pb-2 border-b-2 transition-colors ${
+                          className={`flex items-center space-x-1 sm:space-x-2 pb-2 border-b-2 transition-colors whitespace-nowrap ${
                             activeTab === tab.key
                               ? "border-black text-black font-medium"
                               : "border-transparent text-gray-500 hover:text-gray-700"
                           }`}
                         >
-                          {Icon && <Icon className="w-4 h-4" />}
-                          <span>{tab.label}</span>
-                          <span className="text-sm">{tab.count}</span>
+                          {Icon && <Icon className="w-3 h-3 sm:w-4 sm:h-4" />}
+                          <span className="text-sm sm:text-base">{tab.label}</span>
+                          <span className="text-xs sm:text-sm">{tab.count}</span>
                         </button>
                       )
                     })}
                   </AnimatePresence>
                 </motion.div>
 
-                <DropdownMenu onOpenChange={setShowFilters}>
+                <DropdownMenu open={showFilters} onOpenChange={setShowFilters}>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm">
-                      <motion.div animate={{ rotate: showFilters ? 180 : 0 }} transition={{ duration: 0.2 }}>
-                        <Settings className="w-5 h-5 text-gray-500" />
-                      </motion.div>
-                    </Button>
-                  </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-48 p-4" asChild>
-                        <motion.div
-                          initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                          animate={{ opacity: 1, scale: 1, y: 0 }}
-                          exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          <div className="space-y-4">
-                            <motion.div className="flex items-center justify-between" whileHover={{ x: 2 }}>
-                              <div className="flex items-center space-x-2">
-                                <Paperclip className="w-4 h-4 text-gray-500" />
-                                <span className="text-sm">Files</span>
-                              </div>
-                              <Switch
-                                checked={filters.files}
-                                onCheckedChange={(checked) => setFilters((prev) => ({ ...prev, files: checked }))}
-                              />
-                            </motion.div>
-                            <motion.div className="flex items-center justify-between" whileHover={{ x: 2 }}>
-                              <div className="flex items-center space-x-2">
-                                <Users className="w-4 h-4 text-gray-500" />
-                                <span className="text-sm">People</span>
-                              </div>
-                              <Switch
-                                checked={filters.people}
-                                onCheckedChange={(checked) => setFilters((prev) => ({ ...prev, people: checked }))}
-                              />
-                            </motion.div>
-                            <motion.div className="flex items-center justify-between" whileHover={{ x: 2 }}>
-                              <div className="flex items-center space-x-2">
-                                <MessageSquare className="w-4 h-4 text-gray-500" />
-                                <span className="text-sm">Chats</span>
-                              </div>
-                              <Switch
-                                checked={filters.chats}
-                                onCheckedChange={(checked) => setFilters((prev) => ({ ...prev, chats: checked }))}
-                              />
-                            </motion.div>
-                            <motion.div className="flex items-center justify-between" whileHover={{ x: 2 }}>
-                              <div className="flex items-center space-x-2">
-                                <List className="w-4 h-4 text-gray-500" />
-                                <span className="text-sm">Lists</span>
-                              </div>
-                              <Switch
-                                checked={filters.lists}
-                                onCheckedChange={(checked) => setFilters((prev) => ({ ...prev, lists: checked }))}
-                              />
-                            </motion.div>
-                          </div>
+                    <div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="relative z-50"
+                      >
+                        <motion.div animate={{ rotate: showFilters ? 180 : 0 }} transition={{ duration: 0.2 }}>
+                          <Settings className="w-5 h-5 text-gray-500" />
                         </motion.div>
-                      </DropdownMenuContent>
+                      </Button>
+                    </div>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48 p-4 z-50">
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <div className="space-y-4">
+                        <motion.div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-2">
+                            <Paperclip className="w-4 h-4 text-gray-500" />
+                            <span className="text-sm">Files</span>
+                          </div>
+                          <Switch
+                            checked={filters.files}
+                            onCheckedChange={(checked) => setFilters((prev) => ({ ...prev, files: checked }))}
+                          />
+                        </motion.div>
+                        <motion.div className="flex items-center justify-between" >
+                          <div className="flex items-center space-x-2">
+                            <Users className="w-4 h-4 text-gray-500" />
+                            <span className="text-sm">People</span>
+                          </div>
+                          <Switch
+                            checked={filters.people}
+                            onCheckedChange={(checked) => setFilters((prev) => ({ ...prev, people: checked }))}
+                          />
+                        </motion.div>
+                        <motion.div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-2">
+                            <MessageSquare className="w-4 h-4 text-gray-500" />
+                            <span className="text-sm">Chats</span>
+                          </div>
+                          <Switch
+                            checked={filters.chats}
+                            onCheckedChange={(checked) => setFilters((prev) => ({ ...prev, chats: checked }))}
+                          />
+                        </motion.div>
+                        <motion.div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-2">
+                            <List className="w-4 h-4 text-gray-500" />
+                            <span className="text-sm">Lists</span>
+                          </div>
+                          <Switch
+                            checked={filters.lists}
+                            onCheckedChange={(checked) => setFilters((prev) => ({ ...prev, lists: checked }))}
+                          />
+                        </motion.div>
+                      </div>
+                    </motion.div>
+                  </DropdownMenuContent>
                 </DropdownMenu>
               </div>
             </motion.div>
 
             {/* Results */}
             <motion.div
-              className="p-6 min-h-[400px]"
+              className="p-4 sm:p-6 min-h-[300px] sm:min-h-[400px]"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
