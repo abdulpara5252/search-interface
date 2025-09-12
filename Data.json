@@ -1,0 +1,311 @@
+{
+  "people": [
+    {
+      "id": 1,
+      "name": "Randall Johnsson",
+      "status": "Active now",
+      "avatar": "/professional-man.png",
+      "isActive": true
+    },
+    {
+      "id": 2,
+      "name": "Kristinge Karand",
+      "status": "Active 2d ago",
+      "avatar": "/professional-woman.png",
+      "isActive": false
+    },
+    {
+      "id": 3,
+      "name": "Caroline Dribsson",
+      "status": "Unactivated",
+      "avatar": "/man-with-beard.png",
+      "isActive": false
+    },
+    {
+      "id": 4,
+      "name": "Adam Cadribean",
+      "status": "Active 1w ago",
+      "avatar": "/young-man-contemplative.png",
+      "isActive": false
+    },
+    {
+      "id": 5,
+      "name": "Margareth Cendribgssen",
+      "status": "Active 1w ago",
+      "avatar": "/elderly-woman-knitting.png",
+      "isActive": false
+    },
+    {
+      "id": 6,
+      "name": "Sarah Mitchell",
+      "status": "Active now",
+      "avatar": "/professional-woman.png",
+      "isActive": true
+    },
+    {
+      "id": 7,
+      "name": "David Chen",
+      "status": "Active 1h ago",
+      "avatar": "/professional-man.png",
+      "isActive": false
+    },
+    {
+      "id": 8,
+      "name": "Emily Rodriguez",
+      "status": "Active 3d ago",
+      "avatar": "/elderly-woman-knitting.png",
+      "isActive": false
+    },
+    {
+      "id": 9,
+      "name": "Michael Thompson",
+      "status": "Active 2w ago",
+      "avatar": "/man-with-beard.png",
+      "isActive": false
+    },
+    {
+      "id": 10,
+      "name": "Lisa Anderson",
+      "status": "Unactivated",
+      "avatar": "/young-man-contemplative.png",
+      "isActive": false
+    }
+  ],
+  "files": [
+    {
+      "id": 1,
+      "name": "Random Michal Folder",
+      "type": "folder",
+      "location": "Photos",
+      "fileCount": 12,
+      "lastModified": "Edited 12m ago"
+    },
+    {
+      "id": 2,
+      "name": "creative_file_frandkies.jpg",
+      "type": "image",
+      "location": "Photos/Assets",
+      "lastModified": "Edited 12m ago"
+    },
+    {
+      "id": 3,
+      "name": "files_krande_michelle.avi",
+      "type": "video",
+      "location": "Videos",
+      "lastModified": "Added 12m ago"
+    },
+    {
+      "id": 4,
+      "name": "final_dribbble_presentation.jpg",
+      "type": "image",
+      "location": "Presentations",
+      "lastModified": "Edited 1w ago"
+    },
+    {
+      "id": 5,
+      "name": "dribbble_animation.avi",
+      "type": "video",
+      "location": "Videos",
+      "lastModified": "Added 1y ago"
+    },
+    {
+      "id": 6,
+      "name": "Dribbble Folder",
+      "type": "folder",
+      "location": "Projects",
+      "fileCount": 12,
+      "lastModified": "Edited 2m ago"
+    },
+    {
+      "id": 7,
+      "name": "project_proposal.pdf",
+      "type": "document",
+      "location": "Documents/Proposals",
+      "lastModified": "Edited 1d ago"
+    },
+    {
+      "id": 8,
+      "name": "team_meeting_notes.docx",
+      "type": "document",
+      "location": "Documents/Meetings",
+      "lastModified": "Edited 3h ago"
+    },
+    {
+      "id": 9,
+      "name": "design_system_figma.fig",
+      "type": "design",
+      "location": "Design/Systems",
+      "lastModified": "Edited 2d ago"
+    },
+    {
+      "id": 10,
+      "name": "Marketing Assets",
+      "type": "folder",
+      "location": "Marketing",
+      "fileCount": 25,
+      "lastModified": "Edited 1w ago"
+    },
+    {
+      "id": 11,
+      "name": "product_demo.mp4",
+      "type": "video",
+      "location": "Videos/Demos",
+      "lastModified": "Added 5d ago"
+    },
+    {
+      "id": 12,
+      "name": "logo_variations.png",
+      "type": "image",
+      "location": "Brand/Assets",
+      "lastModified": "Edited 1m ago"
+    }
+  ],
+  "chats": [
+    {
+      "id": 1,
+      "name": "Design Team Discussion",
+      "participants": ["Sarah Mitchell", "David Chen", "Emily Rodriguez"],
+      "lastMessage": "The new mockups look great!",
+      "lastMessageTime": "2m ago",
+      "unreadCount": 3,
+      "type": "group"
+    },
+    {
+      "id": 2,
+      "name": "Project Alpha Updates",
+      "participants": ["Michael Thompson", "Lisa Anderson"],
+      "lastMessage": "Can we schedule a review meeting?",
+      "lastMessageTime": "15m ago",
+      "unreadCount": 0,
+      "type": "group"
+    },
+    {
+      "id": 3,
+      "name": "Randall Johnsson",
+      "participants": ["Randall Johnsson"],
+      "lastMessage": "Thanks for the feedback!",
+      "lastMessageTime": "1h ago",
+      "unreadCount": 1,
+      "type": "direct"
+    },
+    {
+      "id": 4,
+      "name": "Marketing Brainstorm",
+      "participants": ["Sarah Mitchell", "David Chen", "Emily Rodriguez", "Michael Thompson"],
+      "lastMessage": "Let's focus on the Q4 campaign",
+      "lastMessageTime": "2h ago",
+      "unreadCount": 0,
+      "type": "group"
+    },
+    {
+      "id": 5,
+      "name": "Kristinge Karand",
+      "participants": ["Kristinge Karand"],
+      "lastMessage": "The presentation is ready",
+      "lastMessageTime": "3h ago",
+      "unreadCount": 0,
+      "type": "direct"
+    },
+    {
+      "id": 6,
+      "name": "Development Team",
+      "participants": ["David Chen", "Michael Thompson", "Lisa Anderson"],
+      "lastMessage": "Bug fixes deployed to staging",
+      "lastMessageTime": "4h ago",
+      "unreadCount": 2,
+      "type": "group"
+    },
+    {
+      "id": 7,
+      "name": "Caroline Dribsson",
+      "participants": ["Caroline Dribsson"],
+      "lastMessage": "I'll send the files tomorrow",
+      "lastMessageTime": "1d ago",
+      "unreadCount": 0,
+      "type": "direct"
+    },
+    {
+      "id": 8,
+      "name": "Client Feedback",
+      "participants": ["Sarah Mitchell", "Emily Rodriguez", "Adam Cadribean"],
+      "lastMessage": "Client approved the changes",
+      "lastMessageTime": "2d ago",
+      "unreadCount": 0,
+      "type": "group"
+    }
+  ],
+  "lists": [
+    {
+      "id": 1,
+      "name": "Q4 Product Roadmap",
+      "description": "Key features and milestones for Q4",
+      "itemCount": 15,
+      "lastModified": "Updated 2h ago",
+      "type": "project",
+      "owner": "Sarah Mitchell"
+    },
+    {
+      "id": 2,
+      "name": "Design System Components",
+      "description": "UI components and patterns",
+      "itemCount": 42,
+      "lastModified": "Updated 1d ago",
+      "type": "design",
+      "owner": "David Chen"
+    },
+    {
+      "id": 3,
+      "name": "Bug Reports - High Priority",
+      "description": "Critical issues that need immediate attention",
+      "itemCount": 8,
+      "lastModified": "Updated 3h ago",
+      "type": "development",
+      "owner": "Michael Thompson"
+    },
+    {
+      "id": 4,
+      "name": "Marketing Campaign Ideas",
+      "description": "Creative concepts for upcoming campaigns",
+      "itemCount": 23,
+      "lastModified": "Updated 1w ago",
+      "type": "marketing",
+      "owner": "Emily Rodriguez"
+    },
+    {
+      "id": 5,
+      "name": "Client Meeting Notes",
+      "description": "Important points from client discussions",
+      "itemCount": 12,
+      "lastModified": "Updated 2d ago",
+      "type": "meeting",
+      "owner": "Lisa Anderson"
+    },
+    {
+      "id": 6,
+      "name": "Research Findings",
+      "description": "User research insights and data",
+      "itemCount": 18,
+      "lastModified": "Updated 4d ago",
+      "type": "research",
+      "owner": "Randall Johnsson"
+    },
+    {
+      "id": 7,
+      "name": "Team Onboarding Checklist",
+      "description": "Steps for new team member integration",
+      "itemCount": 25,
+      "lastModified": "Updated 1w ago",
+      "type": "process",
+      "owner": "Kristinge Karand"
+    },
+    {
+      "id": 8,
+      "name": "Content Calendar",
+      "description": "Scheduled posts and content pieces",
+      "itemCount": 31,
+      "lastModified": "Updated 3d ago",
+      "type": "content",
+      "owner": "Caroline Dribsson"
+    }
+  ]
+}
